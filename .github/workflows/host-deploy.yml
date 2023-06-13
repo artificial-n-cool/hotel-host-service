@@ -1,0 +1,32 @@
+name: Spring Boot Tests
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: 20
+          distribution: 'adopt'
+          cache: maven
+
+      - name: Build with Maven
+        run: mvn clean package  # --quiet
+
+      - name: Set up MongoDB service
+        uses: supercharge/mongodb-github-action@1.8.0
+
+      - name: Run tests
+        run: mvn test  # --quiet
