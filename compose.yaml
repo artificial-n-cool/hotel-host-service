@@ -12,6 +12,9 @@ services:
         - SPRING_DATA_MONGODB_HOST=mongo-db
         - SPRING_DATA_MONGODB_PORT=27017
         - SPRING_DATA_MONGODB_DATABASE=test-db
+      networks:
+        database: { }
+
     mongo-db:
       image: "mongo"
       container_name: mongo-db
@@ -20,5 +23,12 @@ services:
         - 27017:27017
       volumes:
         - mongo_data:/data/db
+      networks:
+        database: { }
+
 volumes:
   mongo_data:
+
+networks:
+  database:
+    external: true
