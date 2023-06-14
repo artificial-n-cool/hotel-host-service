@@ -19,7 +19,7 @@ import java.util.List;
 @Document("promocije")
 public class Promocija {
     @Id
-    private Long ID;
+    private String id;
     private LocalDate datumOd;
     private LocalDate datumDo;
     private Double procenat;

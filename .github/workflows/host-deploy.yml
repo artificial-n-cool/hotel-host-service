@@ -29,8 +29,25 @@ jobs:
       - name: Build with Maven
         run: mvn clean package  # --quiet
 
-      - name: Set up MongoDB service
-        uses: supercharge/mongodb-github-action@1.8.0
-
       - name: Run tests
         run: mvn test  # --quiet
+
+
+#  deploy:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Docker Login
+#        env:
+#          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+#          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+#        run: |
+#          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#
+#      - name: Docker Build
+#        run: docker-compose build
+#
+#      - name: Docker Tag
+#        run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
+#
+#      - name: Docker Deploy
+#        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend

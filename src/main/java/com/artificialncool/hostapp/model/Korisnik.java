@@ -1,6 +1,7 @@
 package com.artificialncool.hostapp.model;
 
 import com.artificialncool.hostapp.model.enums.KorisnickaUloga;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import lombok.*;
@@ -13,14 +14,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter @Setter
 @Builder
 @Document("korisnici")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Korisnik {
     @Id
-    private Long ID;
+    @EqualsAndHashCode.Include
+    private String id;
 
     @Indexed(unique = true)
     private String username;
 
+    @JsonIgnore
     private String password;
+
     private String ime;
     private String prezime;
 

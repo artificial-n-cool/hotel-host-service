@@ -5,11 +5,9 @@ import com.artificialncool.hostapp.model.enums.KorisnickaUloga;
 import com.artificialncool.hostapp.repository.KorisnikRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -27,7 +25,11 @@ public class KorisnikService {
                 .orElseThrow(() -> new EntityNotFoundException("nema"));
     }
 
-    public void createKorisnici() {
+    public Korisnik saveKorisnik(Korisnik korisnik) {
+        return korisnikRepository.save(korisnik);
+    }
+
+    public void initDb() {
         korisnikRepository.save(Korisnik.builder()
                 .ime("Petar")
                 .prezime("Petrovic")
