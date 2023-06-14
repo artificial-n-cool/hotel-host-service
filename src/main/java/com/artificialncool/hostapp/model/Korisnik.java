@@ -1,6 +1,7 @@
 package com.artificialncool.hostapp.model;
 
 import com.artificialncool.hostapp.model.enums.KorisnickaUloga;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import lombok.*;
@@ -22,7 +23,9 @@ public class Korisnik {
     @Indexed(unique = true)
     private String username;
 
+    @JsonIgnore
     private String password;
+
     private String ime;
     private String prezime;
 
