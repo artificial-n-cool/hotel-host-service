@@ -2,6 +2,7 @@ package com.artificialncool.hostapp.service;
 
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.repository.SmestajRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -74,6 +75,18 @@ public class SmestajService {
         old = copy(old, updated);
 
         return smestajRepository.save(old);
+    }
+
+    public Smestaj addPromotion(String smestajId, Promocija promocija) throws EntityNotFoundException{
+        Smestaj toPromote = getById(smestajId);
+
+        /* Mora na ovako retardiran nacin, jer ako se samo odradi get.add
+            ne izmeni se sam objekat
+         */
+        List<Promocija> promotions = toPromote.getPromocije();
+        promotions.add(promocija);
+        toPromote.setPromocije(promotions);
+        return save(toPromote);
     }
 
     public void deleteById(String id) {

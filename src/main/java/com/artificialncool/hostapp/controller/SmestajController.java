@@ -1,6 +1,9 @@
 package com.artificialncool.hostapp.controller;
 
+import com.artificialncool.hostapp.dto.converter.PromocijaConverter;
+import com.artificialncool.hostapp.dto.model.PromocijaDTO;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.service.SmestajService;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SmestajController {
     private final SmestajService smestajService;
+    private final PromocijaConverter promocijaConverter;
 
     @PostMapping
     public ResponseEntity<SmestajDTO> create(@RequestBody SmestajDTO newSmestajDTO) {
@@ -57,6 +61,15 @@ public class SmestajController {
         catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema smestaj sa tim ID", e);
         }
+    }
+
+    @PutMapping(value = "/promocija/{smestajId}")
+    public ResponseEntity<SmestajDTO> addPromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
+        Smestaj updated = smestajService.addPromotion(promocijaDTO.getSmestajId(), promocija);
+        return new ResponseEntity<>(
+            smestajService.toDTO(updated), HttpStatus.OK
+        );
     }
 
     @DeleteMapping(value = "/{id}")
