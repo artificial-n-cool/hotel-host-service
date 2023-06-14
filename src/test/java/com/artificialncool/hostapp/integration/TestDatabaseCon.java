@@ -77,7 +77,7 @@ public class TestDatabaseCon {
                 .build();
 
 
-        mockMvc.perform(post("/api/korisnik")
+        mockMvc.perform(post("/api/host/korisnik")
                         .content(new ObjectMapper().writeValueAsString(korisnik))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
