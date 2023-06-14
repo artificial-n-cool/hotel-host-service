@@ -1,16 +1,20 @@
 package com.artificialncool.hostapp.model;
 
 import com.artificialncool.hostapp.model.helpers.Cena;
+import com.artificialncool.hostapp.model.helpers.OcenaSmestaja;
 import jakarta.persistence.Id;
 import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
 @Getter
 @Setter
+@Builder
 @Document("smestaji")
 public class Smestaj {
     @Id
@@ -24,6 +28,10 @@ public class Smestaj {
     private Integer maxGostiju;
     private Double prosecnaOcena;
     private Cena baseCena;
+
+    private List<OcenaSmestaja> ocene;
+    private List<Promocija> promocije;
+    private List<Rezervacija> rezervacije;
 
     private String vlasnikID;
 }

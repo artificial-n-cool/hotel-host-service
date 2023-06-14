@@ -77,7 +77,7 @@ public class TestDatabaseCon {
                 .build();
 
 
-        mockMvc.perform(post("/api/korisnik")
+        mockMvc.perform(post("/api/host/korisnik")
                         .content(new ObjectMapper().writeValueAsString(korisnik))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -93,7 +93,7 @@ public class TestDatabaseCon {
     public void shouldReturnAll() throws Exception {
         korisnikRepository.saveAll(List.of(new Korisnik(), new Korisnik(), new Korisnik()));
 
-        mockMvc.perform(get("/api/korisnik/all")
+        mockMvc.perform(get("/api/host/korisnik/all")
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
