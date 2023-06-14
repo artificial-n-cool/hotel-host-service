@@ -23,10 +23,7 @@ public class Smestaj {
     private Integer minGostiju;
     private Integer maxGostiju;
     private Double prosecnaOcena;
-
-    @DocumentReference
     private Cena baseCena;
 
-    @DocumentReference
-    private Korisnik vlasnik;
+    private String vlasnikID;
 }
