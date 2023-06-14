@@ -12,7 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document("cene")
 public class Cena {
     @Id
     private String id;

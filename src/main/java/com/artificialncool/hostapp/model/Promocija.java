@@ -16,7 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document("promocije")
 public class Promocija {
     @Id
     private String id;
@@ -24,7 +23,4 @@ public class Promocija {
     private LocalDate datumDo;
     private Double procenat;
     private List<DayOfWeek> dani;
-
-    @DocumentReference
-    private Smestaj smestaj;
 }

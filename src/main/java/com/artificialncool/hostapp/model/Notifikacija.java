@@ -13,15 +13,10 @@ import org.springframework.data.mongodb.core.mapping.DocumentReference;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document("notifikacije")
 public class Notifikacija {
     @Id
     private String id;
 
     private TipNotifikacije tipNotifikacije;
-
-    private Korisnik primalac;
-
-    @DocumentReference
     private String tekst;
 }
