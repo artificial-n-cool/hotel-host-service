@@ -25,6 +25,29 @@ public class KorisnikService {
                 .orElseThrow(() -> new EntityNotFoundException("nema"));
     }
 
+    public Korisnik getByEmail(String email) throws EntityNotFoundException {
+        return korisnikRepository
+                .findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new EntityNotFoundException("nema korisnika"));
+    }
+
+    public List<Korisnik> getAllByUloga(KorisnickaUloga uloga) {
+        return korisnikRepository
+                .findAllByUloga(uloga);
+    }
+
+    public List<Korisnik> getAllHosts() {
+        return getAllByUloga(KorisnickaUloga.HOST);
+    }
+
+    public List<Korisnik> getAllGuests() {
+        return getAllByUloga(KorisnickaUloga.GUEST);
+    }
+
+    public List<Korisnik> getAllRatedBetterThan(Double rating) {
+        return korisnikRepository.findByProsecnaOcenaGreaterThanEqual(rating);
+    }
+
     public Korisnik saveKorisnik(Korisnik korisnik) {
         return korisnikRepository.save(korisnik);
     }
