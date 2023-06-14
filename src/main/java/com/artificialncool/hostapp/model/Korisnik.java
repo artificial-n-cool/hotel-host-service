@@ -13,9 +13,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter @Setter
 @Builder
 @Document("korisnici")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Korisnik {
     @Id
-    private Long ID;
+    @EqualsAndHashCode.Include
+    private String id;
 
     @Indexed(unique = true)
     private String username;

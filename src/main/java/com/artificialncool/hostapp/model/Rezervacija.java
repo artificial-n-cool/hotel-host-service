@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Document("rezervacije")
 public class Rezervacija {
     @Id
-    private Long ID;
+    private String id;
 
     private Integer brojOsoba;
     private LocalDate datumOd;

@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.DocumentReference;
 @Document("smestaji")
 public class Smestaj {
     @Id
-    private Long ID;
+    private String id;
 
     private String naziv;
     private String lokacija;

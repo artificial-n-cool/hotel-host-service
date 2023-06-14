@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Document("ocenesmestaja")
 public class OcenaSmestaja {
     @Id
-    private Long ID;
+    private String id;
 
     private Double ocena;
     private LocalDateTime datum;

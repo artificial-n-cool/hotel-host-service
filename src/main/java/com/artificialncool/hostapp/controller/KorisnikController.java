@@ -3,7 +3,6 @@ package com.artificialncool.hostapp.controller;
 import com.artificialncool.hostapp.model.Korisnik;
 import com.artificialncool.hostapp.service.KorisnikService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,8 +34,13 @@ public class KorisnikController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createKorisnici() {
-        korisnikService.createKorisnici();
+    public ResponseEntity<Korisnik> createKorisnik(@RequestBody Korisnik korisnik) {
+        return new ResponseEntity<>(korisnikService.saveKorisnik(korisnik), HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/populate")
+    public ResponseEntity<Void> populateDB() {
+        korisnikService.initDb();
         return ResponseEntity.ok().build();
     }
 }

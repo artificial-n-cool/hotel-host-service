@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.DocumentReference;
 @Document("notifikacije")
 public class Notifikacija {
     @Id
-    private Long ID;
+    private String id;
 
     private TipNotifikacije tipNotifikacije;
 
