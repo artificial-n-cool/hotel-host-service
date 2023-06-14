@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(value="/api/korisnik")
+@RequestMapping(value="/api/host/korisnik")
 @RequiredArgsConstructor
 public class KorisnikController {
 

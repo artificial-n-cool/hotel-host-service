@@ -3,22 +3,10 @@ package com.artificialncool.hostapp.dto.converter;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.helpers.Cena;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SmestajConverter {
-    /*
-        private String id;
-    private String naziv;
-    private String lokacija;
-    private String pogodnosti;
-    private String opis;
-    private Integer minGostiju;
-    private Integer maxGostiju;
-    private Double prosecnaOcena;
-    private Double baseCena;
-    private Double totalnaCena;
-    private TipCene tipCene;
-    private String vlasnikID;
-     */
     public Smestaj fromDTO(SmestajDTO dto) {
         return Smestaj.builder()
                 .id(dto.getId())
