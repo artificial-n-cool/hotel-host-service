@@ -32,7 +32,7 @@ public class RezervacijaConverter {
                 .build();
     }
 
-    public RezervacijaDTO toDTOForSmestaj(Rezervacija rezervacija, Smestaj smestaj) {
+    public RezervacijaDTO toDTOForSmestaj(Rezervacija rezervacija, String smestajId) {
         return RezervacijaDTO.builder()
                 .id(rezervacija.getId())
                 .brojOsoba(rezervacija.getBrojOsoba())
@@ -40,7 +40,7 @@ public class RezervacijaConverter {
                 .datumDo(DateConverter.toString(rezervacija.getDatumDo()))
                 .statusRezervacije(rezervacija.getStatusRezervacije().name())
                 .korisnikID(rezervacija.getKorisnikID())
-                .smestajID(smestaj.getId())
+                .smestajID(smestajId)
                 .build();
     }
 }
