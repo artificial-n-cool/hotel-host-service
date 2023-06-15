@@ -89,6 +89,18 @@ public class SmestajService {
         return save(toPromote);
     }
 
+    public Smestaj removePromotion(String smestajId, String promocijaId) throws EntityNotFoundException {
+        Smestaj toCleanup = getById(smestajId);
+
+        List<Promocija> filteredPromotions
+                = toCleanup.getPromocije().stream()
+                .filter(promocija -> !promocija.getId().equals(promocijaId))
+                .toList();
+
+        toCleanup.setPromocije(filteredPromotions);
+        return save(toCleanup);
+    }
+
     public void deleteById(String id) {
         smestajRepository.deleteById(id);
     }

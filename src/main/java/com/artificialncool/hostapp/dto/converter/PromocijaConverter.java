@@ -8,6 +8,17 @@ import java.time.DayOfWeek;
 
 @Component
 public class PromocijaConverter {
+
+    /**
+     * Converts a promotion DTO to the Promocija object. Note that the
+     * DTO object should contain the ID of the residence that it is being
+     * defined for. Also, the start and end dates of the promotion should
+     * be strings in the yyyy-MM-dd format to be parsed successfully
+     * @param dto DTO object of the promotion. Among other things contains
+     *            the ID of the residence it is being defined for and date
+     *            strings in the yyyy-MM-dd format
+     * @return Parsed Promocija object
+     */
     public Promocija fromDTO(PromocijaDTO dto) {
         return Promocija.builder()
                 .id(dto.getId())

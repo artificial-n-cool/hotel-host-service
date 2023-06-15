@@ -63,12 +63,32 @@ public class SmestajController {
         }
     }
 
-    @PutMapping(value = "/promocija/{smestajId}")
+    /**
+     * Adds a promotion to the specified residence. Note that the ID of the
+     * specified residence should be stored within the DTO object.
+     * Also, the dates of the start and end of the promotion should be
+     * strings in the yyyy-MM-dd format to be parsed successfully
+     *
+     * @param promocijaDTO DTO for a promotion. Should store the ID of the
+     *                     residence in question, and promotion start and end
+     *                     dates in the yyyy-MM-dd format.
+     * @return Updated residence DTO
+     */
+    @PutMapping(value = "/promocija")
     public ResponseEntity<SmestajDTO> addPromocija(@RequestBody PromocijaDTO promocijaDTO) {
         Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
         Smestaj updated = smestajService.addPromotion(promocijaDTO.getSmestajId(), promocija);
         return new ResponseEntity<>(
             smestajService.toDTO(updated), HttpStatus.OK
+        );
+    }
+
+    @DeleteMapping(value = "/promocija")
+    public ResponseEntity<SmestajDTO> removePromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
+        Smestaj updated = smestajService.removePromotion(promocijaDTO.getSmestajId(), promocija.getId());
+        return new ResponseEntity<>(
+                smestajService.toDTO(updated), HttpStatus.OK
         );
     }
 
