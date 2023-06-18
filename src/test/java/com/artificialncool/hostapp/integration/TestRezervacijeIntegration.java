@@ -9,12 +9,17 @@ import com.artificialncool.hostapp.model.enums.TipCene;
 import com.artificialncool.hostapp.model.helpers.Cena;
 import com.artificialncool.hostapp.repository.SmestajRepository;
 import com.artificialncool.hostapp.service.RezervacijaService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.testcontainers.utility.DockerImageName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,7 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class TestRezervacijeIntegration extends AbstractIntegrationTest{
+
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+public class TestRezervacijeIntegration {
     @Autowired
     MockMvc mockMvc;
 
@@ -36,6 +46,32 @@ public class TestRezervacijeIntegration extends AbstractIntegrationTest{
 
     @Autowired
     RezervacijaService rezervacijaService;
+
+    static MongoDBContainer mongo
+            = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
+
+
+    /*
+        - SPRING_DATA_MONGODB_HOST=mongo-db
+        - SPRING_DATA_MONGODB_PORT=27017
+        - SPRING_DATA_MONGODB_DATABASE=test-db
+     */
+    @DynamicPropertySource
+    static void configureDBConnection(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.mongodb.host", mongo::getHost);
+        registry.add("spring.data.mongodb.port", mongo::getFirstMappedPort);
+    }
+
+    @BeforeAll
+    static void beforeAll() {
+        mongo.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        mongo.stop();
+    }
+
 
     @BeforeEach
     public void cleanUp() {
