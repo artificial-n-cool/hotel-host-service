@@ -2,10 +2,13 @@ package com.artificialncool.hostapp.service;
 
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
+import com.artificialncool.hostapp.model.helpers.Cena;
 import com.artificialncool.hostapp.repository.SmestajRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,6 +51,11 @@ public class SmestajService {
 
     public SmestajDTO save(SmestajDTO newSmestajDTO) {
         Smestaj newSmestaj = smestajConverter.fromDTO(newSmestajDTO);
+        {
+            Cena cena = newSmestaj.getBaseCena();
+            cena.setId(new ObjectId().toString());
+            newSmestaj.setBaseCena(cena);
+        }
         newSmestaj = save(newSmestaj);
         return smestajConverter.toDTO(newSmestaj);
     }
@@ -74,6 +82,31 @@ public class SmestajService {
         old = copy(old, updated);
 
         return smestajRepository.save(old);
+    }
+
+    public Smestaj addPromotion(String smestajId, Promocija promocija) throws EntityNotFoundException{
+        Smestaj toPromote = getById(smestajId);
+        promocija.setId(new ObjectId().toString());
+
+        /* Mora na ovako retardiran nacin, jer ako se samo odradi get.add
+            ne izmeni se sam objekat
+         */
+        List<Promocija> promotions = toPromote.getPromocije();
+        promotions.add(promocija);
+        toPromote.setPromocije(promotions);
+        return save(toPromote);
+    }
+
+    public Smestaj removePromotion(String smestajId, String promocijaId) throws EntityNotFoundException {
+        Smestaj toCleanup = getById(smestajId);
+
+        List<Promocija> filteredPromotions
+                = toCleanup.getPromocije().stream()
+                .filter(promocija -> !promocija.getId().equals(promocijaId))
+                .toList();
+
+        toCleanup.setPromocije(filteredPromotions);
+        return save(toCleanup);
     }
 
     public void deleteById(String id) {

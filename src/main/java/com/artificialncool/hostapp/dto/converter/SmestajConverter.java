@@ -39,6 +39,7 @@ public class SmestajConverter {
                 .maxGostiju(smestaj.getMaxGostiju())
                 .baseCena(smestaj.getBaseCena().getCena())
                 .tipCene(smestaj.getBaseCena().getTipCene())
+                .vlasnikID(smestaj.getVlasnikID())
                 // TODO: Izracunati finalCena
                 .build();
     }

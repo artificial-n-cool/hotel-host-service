@@ -9,6 +9,7 @@ import lombok.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -39,6 +40,6 @@ public class Korisnik {
     private Double prosecnaOcena;
     private KorisnickaUloga uloga;
 
-    private List<OcenaKorisnika> ocene;
-    private List<Notifikacija> notifikacije;
+    private List<OcenaKorisnika> ocene = new ArrayList<>();
+    private List<Notifikacija> notifikacije = new ArrayList<>();
 }

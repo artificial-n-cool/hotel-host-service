@@ -1,0 +1,148 @@
+package com.artificialncool.hostapp.controller;
+
+import com.artificialncool.hostapp.dto.converter.RezervacijaConverter;
+import com.artificialncool.hostapp.dto.converter.SmestajConverter;
+import com.artificialncool.hostapp.dto.model.RezervacijaDTO;
+import com.artificialncool.hostapp.dto.model.SmestajDTO;
+import com.artificialncool.hostapp.model.Rezervacija;
+import com.artificialncool.hostapp.model.Smestaj;
+import com.artificialncool.hostapp.model.enums.StatusRezervacije;
+import com.artificialncool.hostapp.service.RezervacijaService;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(value="/api/host/rezervacije")
+@RequiredArgsConstructor
+public class RezervacijaController {
+
+    final RezervacijaService rezervacijaService;
+    final RezervacijaConverter rezervacijaConverter;
+    final SmestajConverter smestajConverter;
+
+    @GetMapping(value = "/{smestajId}")
+    public ResponseEntity<List<RezervacijaDTO>>
+    getForSmestaj(@PathVariable String smestajId) {
+        List<RezervacijaDTO> rezervacije
+                = rezervacijaService.findAllBySmestaj(smestajId)
+                .stream()
+                .map(rez -> rezervacijaConverter.toDTOForSmestaj(rez, smestajId))
+                .toList();
+
+        return new ResponseEntity<>(rezervacije, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/nove/{smestajId}")
+    public ResponseEntity<List<RezervacijaDTO>>
+    getNewForSmestaj(@PathVariable String smestajId) {
+        List<RezervacijaDTO> rezervacije
+                = rezervacijaService.findAllNewBySmestaj(smestajId)
+                .stream()
+                .map(rez -> rezervacijaConverter.toDTOForSmestaj(rez, smestajId))
+                .toList();
+
+        return new ResponseEntity<>(rezervacije, HttpStatus.OK);
+    }
+
+
+    /**
+     * It is important to notice that the reservation DTO has to contain the ID of
+     * the residence that is to be reserved and the start and end dates that have
+     * to be strings in yyyy-MM-dd format
+     *
+     * @param rezervacijaDTO DTO that should contain start and end dates as strings
+     *                       in yyyy-MM-dd format, and the ID of the residence
+     * @return DTO of the edited residence
+     */
+    @PostMapping
+    public ResponseEntity<SmestajDTO>
+    createNewForSmestaj(@RequestBody RezervacijaDTO rezervacijaDTO) {
+        Rezervacija rezervacija = rezervacijaConverter.fromDTO(rezervacijaDTO);
+
+        try {
+            Smestaj updated
+                    = rezervacijaService.addReservationForSmestaj(
+                    rezervacija, rezervacijaDTO.getSmestajID()
+            );
+
+            return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
+
+        }
+        catch (IllegalArgumentException e1) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ovaj termin je vec zauzet", e1);
+        }
+        catch (EntityNotFoundException e2) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj", e2);
+        }
+    }
+
+    /**
+     * This creates a new reservation that is automatically accepted. Due to this
+     * other reservations cannot be made in the given interval. Please read the
+     * requirements for the passed params for the reserveNew function
+     *
+     * @param unavailabilityDTO DTO containing start and end dates as yyyy-MM-dd
+     *                          strings, and the ID of the residence
+     * @return Edited residence DTO
+     */
+    @PostMapping(value = "/set-unavailable")
+    public ResponseEntity<SmestajDTO>
+    createNewUnavailability(@RequestBody RezervacijaDTO unavailabilityDTO) {
+        Rezervacija unavailability = rezervacijaConverter.fromDTO(unavailabilityDTO);
+        unavailability.setStatusRezervacije(StatusRezervacije.PRIHVACENO);
+        try {
+            Smestaj updated
+                    = rezervacijaService.addReservationForSmestaj(
+                    unavailability, unavailabilityDTO.getSmestajID()
+            );
+
+            return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
+
+        }
+        catch (IllegalArgumentException e1) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ovaj termin je vec zauzet", e1);
+        }
+        catch (EntityNotFoundException e2) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj", e2);
+        }
+    }
+
+
+    @PutMapping(value = "/accept/{rezId}/{smestajId}")
+    public ResponseEntity<RezervacijaDTO>
+    acceptReservation(@PathVariable String rezId, @PathVariable String smestajId) {
+        // TODO: Dodati mogucnost za automatski accept/reject
+        Rezervacija accepted
+                = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.PRIHVACENO);
+        rezervacijaService.rejectAllOverlaping(rezId, smestajId);
+        return new ResponseEntity<>(
+                rezervacijaConverter.toDTOForSmestaj(accepted, smestajId), HttpStatus.OK
+        );
+    }
+
+    @PutMapping(value = "/reject/{rezId}/{smestajId}")
+    public ResponseEntity<RezervacijaDTO>
+    rejectReservation(@PathVariable String rezId, @PathVariable String smestajId) {
+        Rezervacija rejected
+                = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.ODBIJENO);
+        return new ResponseEntity<>(
+                rezervacijaConverter.toDTOForSmestaj(rejected, smestajId), HttpStatus.OK
+        );
+    }
+
+    @PutMapping(value = "/cancel/{rezId}/{smestajId}")
+    public ResponseEntity<RezervacijaDTO>
+    cancelReservation(@PathVariable String rezId, @PathVariable String smestajId) {
+        Rezervacija cancelled
+                = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.OTKAZANO);
+        return new ResponseEntity<>(
+                rezervacijaConverter.toDTOForSmestaj(cancelled, smestajId), HttpStatus.OK
+        );
+    }
+}

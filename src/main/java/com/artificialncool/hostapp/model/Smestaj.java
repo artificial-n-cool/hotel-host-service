@@ -7,6 +7,7 @@ import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -29,9 +30,9 @@ public class Smestaj {
     private Double prosecnaOcena;
     private Cena baseCena;
 
-    private List<OcenaSmestaja> ocene;
-    private List<Promocija> promocije;
-    private List<Rezervacija> rezervacije;
+    private List<OcenaSmestaja> ocene = new ArrayList<>();
+    private List<Promocija> promocije = new ArrayList<>();
+    private List<Rezervacija> rezervacije = new ArrayList<>();
 
     private String vlasnikID;
 }

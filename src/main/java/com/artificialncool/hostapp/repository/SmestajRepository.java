@@ -1,7 +1,9 @@
 package com.artificialncool.hostapp.repository;
 
+import com.artificialncool.hostapp.model.Rezervacija;
 import com.artificialncool.hostapp.model.Smestaj;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
 import java.util.List;
 
