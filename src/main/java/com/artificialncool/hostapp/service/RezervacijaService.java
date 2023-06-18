@@ -62,7 +62,7 @@ public class RezervacijaService {
     }
 
     public Smestaj rejectAllOverlaping(String id, String smestajId) {
-        Smestaj smestaj = smestajService.getById(id);
+        Smestaj smestaj = smestajService.getById(smestajId);
         Rezervacija prihvacna = findByIdAndSmestaj(id, smestajId);
         smestaj.setRezervacije(
                 smestaj.getRezervacije()
