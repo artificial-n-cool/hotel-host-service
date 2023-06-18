@@ -1,7 +1,9 @@
 package com.artificialncool.hostapp.integration;
 
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
+import com.artificialncool.hostapp.dto.model.PromocijaDTO;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.TipCene;
 import com.artificialncool.hostapp.model.helpers.Cena;
@@ -9,10 +11,14 @@ import com.artificialncool.hostapp.repository.SmestajRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+
+import java.time.DayOfWeek;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -99,5 +105,48 @@ public class TestSmestajIntegration extends AbstractIntegrationTest{
                 .andExpect(jsonPath("$.maxGostiju").value(5));
 
     }
+
+    @Test
+    public void shouldAddPromotion() throws Exception {
+        String id = "1";
+        Smestaj smestaj = Smestaj.builder()
+                .id(id)
+                .naziv("Apartmani Brdo")
+                .lokacija("Banovo Brdo")
+                .pogodnosti("Wifi, Klima, Internet, Kablovska")
+                .opis("Halo najace")
+                .baseCena(
+                        Cena.builder()
+                                .cena(15.)
+                                .tipCene(TipCene.PO_SMESTAJU)
+                                .build()
+                )
+                .vlasnikID("4025ti4j042tu")
+                .minGostiju(1)
+                .maxGostiju(3)
+                .build();
+
+        smestajRepository.save(smestaj);
+
+        PromocijaDTO promocijaDTO = PromocijaDTO.builder()
+                .smestajId(id)
+                .procenat(0.2)
+                .dani(List.of(DayOfWeek.SATURDAY.getValue(), DayOfWeek.SUNDAY.getValue()))
+                .datumOd("2023-07-01")
+                .datumDo("2023-09-01")
+                .build();
+
+        mockMvc.perform(put("/api/host/smestaj/promocija")
+                .content(new ObjectMapper().writeValueAsString(promocijaDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk());
+
+        assertEquals(1, smestajRepository.findById(id).get().getPromocije().size());
+        Promocija p = smestajRepository.findById(id).get().getPromocije().get(0);
+        assertNotNull(p.getId());
+    }
+
 
 }

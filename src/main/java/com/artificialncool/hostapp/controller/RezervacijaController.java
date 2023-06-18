@@ -91,7 +91,7 @@ public class RezervacijaController {
      *                          strings, and the ID of the residence
      * @return Edited residence DTO
      */
-    @PostMapping
+    @PostMapping(value = "/set-unavailable")
     public ResponseEntity<SmestajDTO>
     createNewUnavailability(@RequestBody RezervacijaDTO unavailabilityDTO) {
         Rezervacija unavailability = rezervacijaConverter.fromDTO(unavailabilityDTO);

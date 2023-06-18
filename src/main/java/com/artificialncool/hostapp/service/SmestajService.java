@@ -4,9 +4,11 @@ import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
 import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
+import com.artificialncool.hostapp.model.helpers.Cena;
 import com.artificialncool.hostapp.repository.SmestajRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -49,6 +51,11 @@ public class SmestajService {
 
     public SmestajDTO save(SmestajDTO newSmestajDTO) {
         Smestaj newSmestaj = smestajConverter.fromDTO(newSmestajDTO);
+        {
+            Cena cena = newSmestaj.getBaseCena();
+            cena.setId(new ObjectId().toString());
+            newSmestaj.setBaseCena(cena);
+        }
         newSmestaj = save(newSmestaj);
         return smestajConverter.toDTO(newSmestaj);
     }
@@ -79,6 +86,7 @@ public class SmestajService {
 
     public Smestaj addPromotion(String smestajId, Promocija promocija) throws EntityNotFoundException{
         Smestaj toPromote = getById(smestajId);
+        promocija.setId(new ObjectId().toString());
 
         /* Mora na ovako retardiran nacin, jer ako se samo odradi get.add
             ne izmeni se sam objekat

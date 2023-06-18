@@ -5,6 +5,7 @@ import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -101,6 +102,7 @@ public class RezervacijaService {
         if (!canReserve(rezervacija, smestaj))
             throw new IllegalArgumentException("Rezervacija se preklapa");
 
+        rezervacija.setId(new ObjectId().toString());
         List<Rezervacija> sve = smestaj.getRezervacije();
         sve.add(rezervacija);
         smestaj.setRezervacije(sve);

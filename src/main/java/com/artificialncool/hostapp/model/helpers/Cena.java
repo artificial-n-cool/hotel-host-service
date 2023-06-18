@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 @Builder
 public class Cena {
-    @Id
     private String id;
     private Double cena;
     private TipCene tipCene;
