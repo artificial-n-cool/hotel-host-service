@@ -24,6 +24,7 @@ public class SmestajController {
 
     @PostMapping
     public ResponseEntity<SmestajDTO> create(@RequestBody SmestajDTO newSmestajDTO) {
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(smestajService.save(newSmestajDTO), HttpStatus.CREATED);
     }
 
@@ -54,6 +55,7 @@ public class SmestajController {
     public ResponseEntity<SmestajDTO> update(@RequestBody SmestajDTO updatedDTO) {
         try {
             Smestaj updated = smestajService.fromDTO(updatedDTO);
+            // TODO: Send update to Guest app
             return new ResponseEntity<>(smestajService.toDTO(
                     smestajService.update(updated)
             ), HttpStatus.OK);
@@ -78,6 +80,7 @@ public class SmestajController {
     public ResponseEntity<SmestajDTO> addPromocija(@RequestBody PromocijaDTO promocijaDTO) {
         Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
         Smestaj updated = smestajService.addPromotion(promocijaDTO.getSmestajId(), promocija);
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
             smestajService.toDTO(updated), HttpStatus.OK
         );
@@ -87,6 +90,7 @@ public class SmestajController {
     public ResponseEntity<SmestajDTO> removePromocija(@RequestBody PromocijaDTO promocijaDTO) {
         Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
         Smestaj updated = smestajService.removePromotion(promocijaDTO.getSmestajId(), promocija.getId());
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 smestajService.toDTO(updated), HttpStatus.OK
         );
@@ -95,6 +99,7 @@ public class SmestajController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> deleteOne(@PathVariable String id) {
         smestajService.deleteById(id);
+        // TODO: Send update to Guest app
         return ResponseEntity.ok().build();
     }
 }

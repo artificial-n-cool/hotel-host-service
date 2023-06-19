@@ -70,7 +70,7 @@ public class RezervacijaController {
                     = rezervacijaService.addReservationForSmestaj(
                     rezervacija, rezervacijaDTO.getSmestajID()
             );
-
+            // TODO: Send to Guest service
             return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
 
         }
@@ -101,7 +101,7 @@ public class RezervacijaController {
                     = rezervacijaService.addReservationForSmestaj(
                     unavailability, unavailabilityDTO.getSmestajID()
             );
-
+            // TODO: Send update to Guest app
             return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
 
         }
@@ -120,7 +120,9 @@ public class RezervacijaController {
         // TODO: Dodati mogucnost za automatski accept/reject
         Rezervacija accepted
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.PRIHVACENO);
+        // TODO: send update to Guest app
         rezervacijaService.rejectAllOverlaping(rezId, smestajId);
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(accepted, smestajId), HttpStatus.OK
         );
@@ -131,6 +133,7 @@ public class RezervacijaController {
     rejectReservation(@PathVariable String rezId, @PathVariable String smestajId) {
         Rezervacija rejected
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.ODBIJENO);
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(rejected, smestajId), HttpStatus.OK
         );
@@ -141,6 +144,7 @@ public class RezervacijaController {
     cancelReservation(@PathVariable String rezId, @PathVariable String smestajId) {
         Rezervacija cancelled
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.OTKAZANO);
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(cancelled, smestajId), HttpStatus.OK
         );

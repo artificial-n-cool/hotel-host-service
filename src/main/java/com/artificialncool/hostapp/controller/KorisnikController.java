@@ -35,6 +35,7 @@ public class KorisnikController {
 
     @PostMapping
     public ResponseEntity<Korisnik> createKorisnik(@RequestBody Korisnik korisnik) {
+        // TODO: Notification and Guest service
         return new ResponseEntity<>(korisnikService.saveKorisnik(korisnik), HttpStatus.CREATED);
     }
 
