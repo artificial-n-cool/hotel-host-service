@@ -40,23 +40,23 @@ jobs:
       - name: Run tests
         run: mvn test  # --quiet
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-test
-    if: github.ref == 'refs/heads/master'
-    steps:
-      - name: Docker Login
-        env:
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-
-      - name: Docker Build
-        run: docker-compose build
-
-      - name: Docker Tag
-        run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
-
-      - name: Docker Deploy
-        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build-and-test
+#    if: github.ref == 'refs/heads/master'
+#    steps:
+#      - name: Docker Login
+#        env:
+#          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+#          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+#        run: |
+#          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#
+#      - name: Docker Build
+#        run: docker-compose build
+#
+#      - name: Docker Tag
+#        run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
+#
+#      - name: Docker Deploy
+#        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
