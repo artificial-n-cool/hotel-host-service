@@ -1,0 +1,34 @@
+version: "3.8"
+services:
+    host-app:
+      container_name: host-app
+      build: ..
+      restart: always
+      ports:
+        - "8080:8080"
+      depends_on:
+        - mongo-db-host
+      environment:
+        - SPRING_DATA_MONGODB_HOST=mongo-db-host
+        - SPRING_DATA_MONGODB_PORT=27017
+        - SPRING_DATA_MONGODB_DATABASE=test-db
+      networks:
+        - database-net
+
+    mongo-db-host:
+      image: "mongo"
+      container_name: mongo-db-host
+      restart: always
+      ports:
+        - 27017:27017
+      volumes:
+        - host-db:/data/db
+      networks:
+        - database-net
+
+volumes:
+  host-db: { }
+
+networks:
+  database-net:
+    name: app-net
