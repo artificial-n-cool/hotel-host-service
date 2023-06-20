@@ -1,10 +1,7 @@
 package com.artificialncool.hostapp.model;
 
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -16,15 +13,11 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document("promocije")
+@Builder
 public class Promocija {
-    @Id
-    private Long ID;
+    private String id;
     private LocalDate datumOd;
     private LocalDate datumDo;
     private Double procenat;
     private List<DayOfWeek> dani;
-
-    @DocumentReference
-    private Smestaj smestaj;
 }

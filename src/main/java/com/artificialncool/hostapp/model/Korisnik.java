@@ -1,11 +1,16 @@
 package com.artificialncool.hostapp.model;
 
 import com.artificialncool.hostapp.model.enums.KorisnickaUloga;
+import com.artificialncool.hostapp.model.helpers.OcenaKorisnika;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import lombok.*;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,14 +18,18 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Getter @Setter
 @Builder
 @Document("korisnici")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Korisnik {
     @Id
-    private Long ID;
+    @EqualsAndHashCode.Include
+    private String id;
 
     @Indexed(unique = true)
     private String username;
 
+    @JsonIgnore
     private String password;
+
     private String ime;
     private String prezime;
 
@@ -30,4 +39,7 @@ public class Korisnik {
     private String prebivalste;
     private Double prosecnaOcena;
     private KorisnickaUloga uloga;
+
+    private List<OcenaKorisnika> ocene = new ArrayList<>();
+    private List<Notifikacija> notifikacije = new ArrayList<>();
 }

@@ -2,10 +2,7 @@ package com.artificialncool.hostapp.model;
 
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
@@ -15,19 +12,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Getter
 @Setter
-@Document("rezervacije")
+@Builder
 public class Rezervacija {
     @Id
-    private Long ID;
+    private String id;
 
     private Integer brojOsoba;
     private LocalDate datumOd;
     private LocalDate datumDo;
     private StatusRezervacije statusRezervacije;
-
-    @DocumentReference
-    private Korisnik korisnik;
-
-    @DocumentReference
-    private Smestaj smestaj;
+    private String korisnikID;
 }
