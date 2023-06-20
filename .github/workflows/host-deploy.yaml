@@ -20,7 +20,7 @@ jobs:
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
         - name: Docker Build
-          run: docker-compose -f "../../compose.yaml" build
+          run: ls && docker-compose -f "../../compose.yaml" build
 
         - name: Docker Tag
           run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
