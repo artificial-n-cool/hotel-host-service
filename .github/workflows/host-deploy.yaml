@@ -20,7 +20,7 @@ jobs:
             docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
         - name: Print me
-          run: echo | pwd
+          run: echo | pwd && echo | ls
 
         - name: Docker Build
           run: docker-compose -f "compose.yaml" build
