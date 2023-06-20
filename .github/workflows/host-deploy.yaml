@@ -44,7 +44,7 @@ jobs:
         run: docker-compose build
 
       - name: Docker Tag
-        run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
+        run: docker tag hotel-host-service_host-app matijamatovic/devops-host-backend:latest
 
       - name: Docker Deploy
         run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
