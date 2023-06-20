@@ -1,32 +1,50 @@
 name: Host Deployment flow
 
 on:
-  workflow_run:
-    workflows:
-      - "Host App flow"
-    types:
-      - completed
+  push:
+    branches:
+      - master
 
 jobs:
-    deploy:
-      runs-on: ubuntu-latest
-      if: github.ref == 'refs/heads/master'
-      steps:
-        - name: Docker Login
-          env:
-            DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-            DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-          run: |
-            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-        - name: Print me
-          run: echo | pwd && echo | ls
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-        - name: Docker Build
-          run: docker-compose -f "compose.yaml" build
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-        - name: Docker Tag
-          run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
+      - name: Build with Maven
+        run: mvn clean package  # --quiet
 
-        - name: Docker Deploy
-          run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
+      - name: Run tests
+        run: mvn test  # --quiet
+
+      - name: Docker Login
+        env:
+          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+      - name: Docker Build
+        run: docker-compose build
+
+      - name: Docker Tag
+        run: docker tag hostapp_host-app matijamatovic/devops-host-backend:latest
+
+      - name: Docker Deploy
+        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
