@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mongo-db-host
+  name: mongo-db-host
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: mongo-db-host
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.0 (40646f47)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/app-net: "true"
+        io.kompose.service: mongo-db-host
+    spec:
+      containers:
+        - image: mongo
+          name: mongo-db-host
+          ports:
+            - containerPort: 27017
+          resources: {}
+          volumeMounts:
+            - mountPath: /data/db
+              name: host-db
+      restartPolicy: Always
+      volumes:
+        - name: host-db
+          persistentVolumeClaim:
+            claimName: host-db
+status: {}

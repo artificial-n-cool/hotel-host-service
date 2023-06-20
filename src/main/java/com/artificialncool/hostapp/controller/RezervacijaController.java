@@ -9,22 +9,32 @@ import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import com.artificialncool.hostapp.service.RezervacijaService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping(value="/api/host/rezervacije")
-@RequiredArgsConstructor
 public class RezervacijaController {
 
     final RezervacijaService rezervacijaService;
     final RezervacijaConverter rezervacijaConverter;
     final SmestajConverter smestajConverter;
+    final RestTemplate restTemplate;
+
+    public RezervacijaController(RezervacijaService rezervacijaService, RezervacijaConverter rezervacijaConverter, SmestajConverter smestajConverter, RestTemplateBuilder builder) {
+        this.rezervacijaService = rezervacijaService;
+        this.rezervacijaConverter = rezervacijaConverter;
+        this.smestajConverter = smestajConverter;
+        this.restTemplate = builder.build();
+    }
 
     @GetMapping(value = "/{smestajId}")
     public ResponseEntity<List<RezervacijaDTO>>
@@ -70,7 +80,7 @@ public class RezervacijaController {
                     = rezervacijaService.addReservationForSmestaj(
                     rezervacija, rezervacijaDTO.getSmestajID()
             );
-
+            // TODO: Send to Guest service
             return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
 
         }
@@ -101,7 +111,19 @@ public class RezervacijaController {
                     = rezervacijaService.addReservationForSmestaj(
                     unavailability, unavailabilityDTO.getSmestajID()
             );
-
+            // TODO: Send update to Guest app
+            unavailabilityDTO.setStatusRezervacije(StatusRezervacije.PRIHVACENO.name());
+            try {
+                restTemplate.postForEntity(
+                        "http://guest-app:8080/api/guest/rezervacija/addRezervacija",
+                        unavailabilityDTO,
+                        Void.class
+                );
+            }
+            catch (RestClientException ex) {
+                ex.printStackTrace();
+                System.out.println("Nebitno");
+            }
             return new ResponseEntity<>(smestajConverter.toDTO(updated), HttpStatus.OK);
 
         }
@@ -120,7 +142,36 @@ public class RezervacijaController {
         // TODO: Dodati mogucnost za automatski accept/reject
         Rezervacija accepted
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.PRIHVACENO);
-        rezervacijaService.rejectAllOverlaping(rezId, smestajId);
+        // TODO: send update to Guest app
+        try {
+            restTemplate.exchange(
+                    String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.PRIHVACENO),
+                    HttpMethod.PUT,
+                    null,
+                    Void.class
+            );
+        }
+        catch (RestClientException ex) {
+            ex.printStackTrace();
+            System.out.println("Nebitno");
+        }
+
+        List<Rezervacija> odbijene = rezervacijaService.rejectAllOverlaping(rezId, smestajId);
+        for (Rezervacija odbijena : odbijene) {
+            try {
+                restTemplate.exchange(
+                        String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", odbijena.getId(), smestajId, StatusRezervacije.ODBIJENO),
+                        HttpMethod.PUT,
+                        null,
+                        Void.class
+                );
+            }
+            catch (RestClientException ex) {
+                ex.printStackTrace();
+                System.out.println("Nebitno");
+            }
+        }
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(accepted, smestajId), HttpStatus.OK
         );
@@ -131,6 +182,18 @@ public class RezervacijaController {
     rejectReservation(@PathVariable String rezId, @PathVariable String smestajId) {
         Rezervacija rejected
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.ODBIJENO);
+        try {
+            restTemplate.exchange(
+                    String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.ODBIJENO),
+                    HttpMethod.PUT,
+                    null,
+                    Void.class
+            );
+        }
+        catch (RestClientException ex) {
+            ex.printStackTrace();
+            System.out.println("Nebitno");
+        }
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(rejected, smestajId), HttpStatus.OK
         );
@@ -141,6 +204,7 @@ public class RezervacijaController {
     cancelReservation(@PathVariable String rezId, @PathVariable String smestajId) {
         Rezervacija cancelled
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.OTKAZANO);
+        // TODO: Send update to Guest app
         return new ResponseEntity<>(
                 rezervacijaConverter.toDTOForSmestaj(cancelled, smestajId), HttpStatus.OK
         );

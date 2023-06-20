@@ -1,12 +1,12 @@
 build:
-	docker-compose --env-file "/home/matija/programi/DevOps/Dockerfiles/.env" build
-	docker-compose --env-file "/home/matija/programi/DevOps/Dockerfiles/.env" up  # -d
+	docker-compose build
+	docker-compose up  # -d
 clean:
 	docker stop host-app
-	docker stop mongo-db
+	docker stop mongo-db-host
 	docker rm host-app
-	docker rm mongo-db
-	docker rmi hostapp_host-app
+	docker rm mongo-db-host
+	docker rmi hotel-host-service_host-app
 init-repo:
 	git init
 	git add README.md

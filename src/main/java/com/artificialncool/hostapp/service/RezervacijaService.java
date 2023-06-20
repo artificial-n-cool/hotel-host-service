@@ -61,9 +61,14 @@ public class RezervacijaService {
         return findByIdAndSmestaj(id, smestajId);
     }
 
-    public Smestaj rejectAllOverlaping(String id, String smestajId) {
+    public List<Rezervacija> rejectAllOverlaping(String id, String smestajId) {
         Smestaj smestaj = smestajService.getById(smestajId);
         Rezervacija prihvacna = findByIdAndSmestaj(id, smestajId);
+        List<Rezervacija> odbijene = smestaj.getRezervacije()
+                        .stream()
+                        .filter(r -> !r.getId().equals(id) && checkIfOverlap(r, prihvacna))
+                        .toList();
+
         smestaj.setRezervacije(
                 smestaj.getRezervacije()
                         .stream()
@@ -74,7 +79,8 @@ public class RezervacijaService {
                         .toList()
         );
 
-        return smestajService.save(smestaj);
+        smestajService.save(smestaj);
+        return odbijene;
     }
 
     public boolean checkIfOverlap(Rezervacija r1, Rezervacija r2) {
@@ -102,7 +108,8 @@ public class RezervacijaService {
         if (!canReserve(rezervacija, smestaj))
             throw new IllegalArgumentException("Rezervacija se preklapa");
 
-        rezervacija.setId(new ObjectId().toString());
+        if (rezervacija.getId() == null || rezervacija.getId().equals(""))
+            rezervacija.setId(new ObjectId().toString());
         List<Rezervacija> sve = smestaj.getRezervacije();
         sve.add(rezervacija);
         smestaj.setRezervacije(sve);
