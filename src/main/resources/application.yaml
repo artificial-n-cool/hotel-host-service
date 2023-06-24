@@ -30,3 +30,11 @@ management:
       enabled: true
     info:
       enabled: true
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - metrics
+          - prometheus
+          - loggers
