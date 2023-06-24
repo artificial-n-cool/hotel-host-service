@@ -20,7 +20,7 @@ public class HelloController {
     @GetMapping
     public ResponseEntity<String> helloWorld() {
         String response
-            = restTemplate.getForObject("http://guest-app:8080/api/guest/smestaj/hello", String.class);
+            = restTemplate.getForObject("http://guest-app-service:8080/api/guest/smestaj/hello", String.class);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

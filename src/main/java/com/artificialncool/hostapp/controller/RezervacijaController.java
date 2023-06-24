@@ -115,7 +115,7 @@ public class RezervacijaController {
             unavailabilityDTO.setStatusRezervacije(StatusRezervacije.PRIHVACENO.name());
             try {
                 restTemplate.postForEntity(
-                        "http://guest-app:8080/api/guest/rezervacija/addRezervacija",
+                        "http://guest-app-service:8080/api/guest/rezervacija/addRezervacija",
                         unavailabilityDTO,
                         Void.class
                 );
@@ -145,7 +145,7 @@ public class RezervacijaController {
         // TODO: send update to Guest app
         try {
             restTemplate.exchange(
-                    String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.PRIHVACENO),
+                    String.format("http://guest-app-service:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.PRIHVACENO),
                     HttpMethod.PUT,
                     null,
                     Void.class
@@ -160,7 +160,7 @@ public class RezervacijaController {
         for (Rezervacija odbijena : odbijene) {
             try {
                 restTemplate.exchange(
-                        String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", odbijena.getId(), smestajId, StatusRezervacije.ODBIJENO),
+                        String.format("http://guest-app-service:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", odbijena.getId(), smestajId, StatusRezervacije.ODBIJENO),
                         HttpMethod.PUT,
                         null,
                         Void.class
@@ -184,7 +184,7 @@ public class RezervacijaController {
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.ODBIJENO);
         try {
             restTemplate.exchange(
-                    String.format("http://guest-app:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.ODBIJENO),
+                    String.format("http://guest-app-service:8080/api/guest/rezervacija/setStatusRezervacije/%s/%s/%s", rezId, smestajId, StatusRezervacije.ODBIJENO),
                     HttpMethod.PUT,
                     null,
                     Void.class
