@@ -16,3 +16,9 @@ init-repo:
 	git branch -M master
 	git remote add origin https://github.com/MatijaMatovic/DevOpsProj.git
 	git push -u origin master
+dockerize:
+	docker build -t host-app .
+kube-cleanup:
+	kubectl delete deployment host-app
+	docker rm host-app
+	docker rmi host-app

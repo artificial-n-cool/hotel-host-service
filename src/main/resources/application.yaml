@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: guest-app
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}
+      #      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}
+      #     uri: mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}.mongodb.net/${MONGO_DB}
+      database: ${MONGO_DB}
+      username: ""
+      password: ""
+  cloud:
+    kubernetes:
+      secrets:
+        name: db-secret
+      config:
+        enabled: true
+      sources:
+        - namespace: default
+          name: mongo-conf
+      reload:
+        enabled: true
+        mode: polling
+        period: 1000
+management:
+  endpoint:
+    restart:
+      enabled: true
+    health:
+      enabled: true
+    info:
+      enabled: true

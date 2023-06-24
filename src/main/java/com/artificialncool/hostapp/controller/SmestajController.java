@@ -35,7 +35,7 @@ public class SmestajController {
         SmestajDTO saved = smestajService.save(newSmestajDTO);
         try {
             restTemplate.postForEntity(
-                    "http://guest-app:8080/api/guest/smestaj/addSmestaj",
+                    "http://guest-app-service:8080/api/guest/smestaj/addSmestaj",
                     newSmestajDTO,
                     Void.class
             );
@@ -78,7 +78,7 @@ public class SmestajController {
             SmestajDTO savedDTO = smestajService.toDTO(smestajService.update(updated));
             try {
                 restTemplate.exchange(
-                        "http://guest-app:8080/api/guest/smestaj/updateSmestaj",
+                        "http://guest-app-service:8080/api/guest/smestaj/updateSmestaj",
                         HttpMethod.PUT,
                         new HttpEntity<>(savedDTO, null),
                         Void.class
@@ -131,7 +131,7 @@ public class SmestajController {
     public ResponseEntity<Void> deleteOne(@PathVariable String id) {
         smestajService.deleteById(id);
         try {
-            restTemplate.delete("http://guest-api:8080/api/guest/deleteSmestaj/" + id);
+            restTemplate.delete("http://guest-app-service:8080/api/guest/deleteSmestaj/" + id);
         }
         catch (RestClientException ex) {
             ex.printStackTrace();
