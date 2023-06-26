@@ -7,8 +7,9 @@ import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.service.SmestajService;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,10 @@ public class SmestajController {
     private final PromocijaConverter promocijaConverter;
     private final RestTemplate restTemplate;
 
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    private static final Logger logger = LoggerFactory.getLogger(KorisnikController.class);
     public SmestajController(SmestajService smestajService, PromocijaConverter promocijaConverter, RestTemplateBuilder builder) {
         this.smestajService = smestajService;
         this.promocijaConverter = promocijaConverter;
@@ -32,6 +37,7 @@ public class SmestajController {
     }
     @PostMapping
     public ResponseEntity<SmestajDTO> create(@RequestBody SmestajDTO newSmestajDTO) {
+        logger.info("Incoming POST request at {} for request /smestaj", applicationName);
         SmestajDTO saved = smestajService.save(newSmestajDTO);
         try {
             restTemplate.postForEntity(
@@ -51,6 +57,7 @@ public class SmestajController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SmestajDTO> readOne(@PathVariable String id) {
+        logger.info("Incoming GET request at {} for request /smestaj/ID", applicationName);
         try {
             return new ResponseEntity<>(
                     smestajService.toDTO(smestajService.getById(id)),
@@ -64,6 +71,7 @@ public class SmestajController {
 
     @GetMapping
     public ResponseEntity<List<SmestajDTO>> readAll() {
+        logger.info("Incoming GET request at {} for request /smestaj", applicationName);
         return new ResponseEntity<>(
                 smestajService.getAll()
                         .stream().map(smestajService::toDTO).toList(),
@@ -73,6 +81,7 @@ public class SmestajController {
 
     @PutMapping
     public ResponseEntity<SmestajDTO> update(@RequestBody SmestajDTO updatedDTO) {
+        logger.info("Incoming PUT request at {} for request /smestaj", applicationName);
         try {
             Smestaj updated = smestajService.fromDTO(updatedDTO);
             SmestajDTO savedDTO = smestajService.toDTO(smestajService.update(updated));
@@ -109,6 +118,7 @@ public class SmestajController {
      */
     @PutMapping(value = "/promocija")
     public ResponseEntity<SmestajDTO> addPromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        logger.info("Incoming PUT request at {} for request /smestaj/promocija", applicationName);
         Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
         Smestaj updated = smestajService.addPromotion(promocijaDTO.getSmestajId(), promocija);
         // TODO: Send update to Guest app
@@ -119,6 +129,7 @@ public class SmestajController {
 
     @DeleteMapping(value = "/promocija")
     public ResponseEntity<SmestajDTO> removePromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        logger.info("Incoming DELETE request at {} for request /smestaj/promocija", applicationName);
         Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
         Smestaj updated = smestajService.removePromotion(promocijaDTO.getSmestajId(), promocija.getId());
         // TODO: Send update to Guest app
@@ -129,6 +140,7 @@ public class SmestajController {
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> deleteOne(@PathVariable String id) {
+        logger.info("Incoming DELETE request at {} for request /smestaj", applicationName);
         smestajService.deleteById(id);
         try {
             restTemplate.delete("http://guest-app-service:8080/api/guest/deleteSmestaj/" + id);

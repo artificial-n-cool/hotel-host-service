@@ -9,6 +9,9 @@ import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import com.artificialncool.hostapp.service.RezervacijaService;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,12 @@ public class RezervacijaController {
     final SmestajConverter smestajConverter;
     final RestTemplate restTemplate;
 
+    @Value("${spring.application.name}")
+    private String applicationName;
+
+    private static final Logger logger = LoggerFactory.getLogger(KorisnikController.class);
+
+
     public RezervacijaController(RezervacijaService rezervacijaService, RezervacijaConverter rezervacijaConverter, SmestajConverter smestajConverter, RestTemplateBuilder builder) {
         this.rezervacijaService = rezervacijaService;
         this.rezervacijaConverter = rezervacijaConverter;
@@ -39,6 +48,8 @@ public class RezervacijaController {
     @GetMapping(value = "/{smestajId}")
     public ResponseEntity<List<RezervacijaDTO>>
     getForSmestaj(@PathVariable String smestajId) {
+        logger.info("Incoming GET request at {} for request /rezervacije", applicationName);
+
         List<RezervacijaDTO> rezervacije
                 = rezervacijaService.findAllBySmestaj(smestajId)
                 .stream()
@@ -51,6 +62,7 @@ public class RezervacijaController {
     @GetMapping(value = "/nove/{smestajId}")
     public ResponseEntity<List<RezervacijaDTO>>
     getNewForSmestaj(@PathVariable String smestajId) {
+        logger.info("Incoming GET request at {} for request /rezervacije/nove", applicationName);
         List<RezervacijaDTO> rezervacije
                 = rezervacijaService.findAllNewBySmestaj(smestajId)
                 .stream()
@@ -73,6 +85,7 @@ public class RezervacijaController {
     @PostMapping
     public ResponseEntity<SmestajDTO>
     createNewForSmestaj(@RequestBody RezervacijaDTO rezervacijaDTO) {
+        logger.info("Incoming POST request at {} for request /rezervacije", applicationName);
         Rezervacija rezervacija = rezervacijaConverter.fromDTO(rezervacijaDTO);
 
         try {
@@ -104,6 +117,7 @@ public class RezervacijaController {
     @PostMapping(value = "/set-unavailable")
     public ResponseEntity<SmestajDTO>
     createNewUnavailability(@RequestBody RezervacijaDTO unavailabilityDTO) {
+        logger.info("Incoming POST request at {} for request /rezervacije/set-unavailable", applicationName);
         Rezervacija unavailability = rezervacijaConverter.fromDTO(unavailabilityDTO);
         unavailability.setStatusRezervacije(StatusRezervacije.PRIHVACENO);
         try {
@@ -140,6 +154,7 @@ public class RezervacijaController {
     public ResponseEntity<RezervacijaDTO>
     acceptReservation(@PathVariable String rezId, @PathVariable String smestajId) {
         // TODO: Dodati mogucnost za automatski accept/reject
+        logger.info("Incoming PUT request at {} for request /accept", applicationName);
         Rezervacija accepted
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.PRIHVACENO);
         // TODO: send update to Guest app
@@ -180,6 +195,7 @@ public class RezervacijaController {
     @PutMapping(value = "/reject/{rezId}/{smestajId}")
     public ResponseEntity<RezervacijaDTO>
     rejectReservation(@PathVariable String rezId, @PathVariable String smestajId) {
+        logger.info("Incoming PUT request at {} for request /rezervacije/reject", applicationName);
         Rezervacija rejected
                 = rezervacijaService.setReservationStatus(rezId, smestajId, StatusRezervacije.ODBIJENO);
         try {

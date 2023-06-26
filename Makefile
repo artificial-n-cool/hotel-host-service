@@ -22,3 +22,10 @@ kube-cleanup:
 	kubectl delete deployment host-app
 	docker rm host-app
 	docker rmi host-app
+	
+start-trace:
+	minikube start
+	eval $(minikube docker-env)
+	docker build -t host-app .
+	cd ~/programi/DevOps/kubernetes-config/project-chart && helm install -f host_values.yaml host-backend .
+	
