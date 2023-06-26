@@ -28,4 +28,4 @@ start-trace:
 	eval $(minikube docker-env)
 	docker build -t host-app .
 	cd ~/programi/DevOps/kubernetes-config/project-chart && helm install -f host_values.yaml host-backend .
-	
+

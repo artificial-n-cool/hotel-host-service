@@ -24,6 +24,7 @@ spring:
         enabled: true
         mode: polling
         period: 1000
+
 #  spring:
 #    sleuth:
 #      sampler:
@@ -53,6 +54,7 @@ management:
       enabled: true
     info:
       enabled: true
+
   health:
     diskspace:
       enabled: true
