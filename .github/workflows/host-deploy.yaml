@@ -36,18 +36,26 @@ jobs:
       - name: Run tests
         run: mvn test  # --quiet
 
-      - name: Docker Login
-        env:
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        run: |
-          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-
-      - name: Docker Build
-        run: docker-compose build
-
-      - name: Docker Tag
-        run: docker tag hotel-host-service_host-app matijamatovic/devops-host-backend:latest
-
-      - name: Docker Deploy
-        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
+      - name: Kaniko build
+        uses: aevea/action-kaniko@master
+        with:
+          image: matijamatovic/devops-host-backend
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          tag: 1.0.0
+#
+#      - name: Docker Login
+#        env:
+#          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+#          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+#        run: |
+#          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+#
+#      - name: Docker Build
+#        run: docker-compose build
+#
+#      - name: Docker Tag
+#        run: docker tag hotel-host-service_host-app matijamatovic/devops-host-backend:latest
+#
+#      - name: Docker Deploy
+#        run: docker push ${{secrets.DOCKER_USERNAME}}/devops-host-backend
