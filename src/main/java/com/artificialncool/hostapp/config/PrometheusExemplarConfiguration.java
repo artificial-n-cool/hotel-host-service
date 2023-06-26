@@ -8,10 +8,14 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exemplars.DefaultExemplarSampler;
 import io.prometheus.client.exemplars.tracer.otel_agent.
         OpenTelemetryAgentSpanContextSupplier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(
+        value="spring.profiles.active",
+        havingValue = "prod")
 public class PrometheusExemplarConfiguration {
     @Bean
     public PrometheusMeterRegistry prometheusMeterRegistryWithExemplar

@@ -1,5 +1,6 @@
 package com.artificialncool.hostapp.integration;
 
+import com.artificialncool.hostapp.config.PrometheusExemplarConfiguration;
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.PromocijaDTO;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
@@ -39,6 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TestSmestajIntegration {
     @Autowired
     MockMvc mockMvc;
+
+
 
     @Autowired
     SmestajRepository smestajRepository;
