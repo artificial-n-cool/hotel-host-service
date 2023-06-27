@@ -4,6 +4,9 @@ import com.artificialncool.hostapp.model.enums.TipCene;
 import com.artificialncool.hostapp.model.helpers.Cena;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -23,4 +26,5 @@ public class SmestajDTO {
     private Double totalnaCena;
     private TipCene tipCene;
     private String vlasnikID;
+    private List<String> slike = new ArrayList<>();
 }
