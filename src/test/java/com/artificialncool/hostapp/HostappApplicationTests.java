@@ -7,7 +7,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.config.name=test")
+@SpringBootTest
+@TestPropertySource("classpath:test.properties")
 class HostappApplicationTests {
 
 	@Test
@@ -15,3 +16,4 @@ class HostappApplicationTests {
 	}
 
 }
+
