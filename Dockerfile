@@ -20,7 +20,7 @@ FROM eclipse-temurin:17-jdk-alpine AS package
 
 COPY --from=build /code/target/host-app.jar /
 COPY --from=OTEL_AGENT /tmp/opentelemetry-javaagent.jar /otel-javaagent.jar
-ENV JAVA_OPTS "-Dspring.config.location=src/main/resources/application.yml"
+ENV JAVA_OPTS "-Dspring.config.location=src/main/resources/application-prod.yaml"
 
 EXPOSE 8080
 ENTRYPOINT exec java -javaagent:/otel-javaagent.jar -jar host-app.jar

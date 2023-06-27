@@ -24,6 +24,7 @@ public class SmestajConverter {
                                 .build()
                 )
                 .vlasnikID(dto.getVlasnikID())
+                .slike(dto.getSlike())
                 .build();
     }
 
@@ -40,6 +41,7 @@ public class SmestajConverter {
                 .baseCena(smestaj.getBaseCena().getCena())
                 .tipCene(smestaj.getBaseCena().getTipCene())
                 .vlasnikID(smestaj.getVlasnikID())
+                .slike(smestaj.getSlike())
                 // TODO: Izracunati finalCena
                 .build();
     }

@@ -39,17 +39,26 @@ public class SmestajController {
     public ResponseEntity<SmestajDTO> create(@RequestBody SmestajDTO newSmestajDTO) {
         logger.info("Incoming POST request at {} for request /smestaj", applicationName);
         SmestajDTO saved = smestajService.save(newSmestajDTO);
-        try {
-            restTemplate.postForEntity(
-                    "http://guest-app-service:8080/api/guest/smestaj/addSmestaj",
-                    newSmestajDTO,
-                    Void.class
-            );
-        }
-        catch (RestClientException ex) {
-            ex.printStackTrace();
-            System.out.println("Nebitno");
-        }
+        Thread syncThread = new Thread(() -> {
+            try {
+                restTemplate.postForEntity(
+                        "http://guest-app-service:8080/api/guest/smestaj/addSmestaj",
+                        newSmestajDTO,
+                        Void.class
+                );
+                restTemplate.postForEntity(
+                        "http://auth-app-service:8080/api/auth/smestaj/addSmestaj",
+                        newSmestajDTO,
+                        Void.class
+                );
+            }
+            catch (RestClientException ex) {
+                ex.printStackTrace();
+                System.out.println("Nebitno");
+            }
+        });
+        syncThread.start();
+
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }

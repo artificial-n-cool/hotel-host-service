@@ -6,7 +6,8 @@ clean:
 	docker stop mongo-db-host
 	docker rm host-app
 	docker rm mongo-db-host
-	docker rmi hotel-host-service_host-app
+	docker rmi hotel-host-service_host-app:latest
+
 init-repo:
 	git init
 	git add README.md
