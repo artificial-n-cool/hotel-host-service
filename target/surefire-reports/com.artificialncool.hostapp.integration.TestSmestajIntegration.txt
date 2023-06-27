@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.artificialncool.hostapp.integration.TestSmestajIntegration
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.297 s - in com.artificialncool.hostapp.integration.TestSmestajIntegration
