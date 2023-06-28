@@ -28,4 +28,14 @@ public class PromocijaConverter {
                 .dani(dto.getDani().stream().map(DayOfWeek::of).toList())
                 .build();
     }
+
+    public PromocijaDTO toDTO(Promocija promocija) {
+        return PromocijaDTO.builder()
+                .id(promocija.getId())
+                .datumOd(promocija.getDatumOd().toString())
+                .datumDo(promocija.getDatumDo().toString())
+                .procenat(promocija.getProcenat())
+                .dani(promocija.getDani().stream().map(DayOfWeek::getValue).toList())
+                .build();
+    }
 }

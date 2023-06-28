@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
@@ -120,6 +123,16 @@ public class SmestajController {
         catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema smestaj sa tim ID", e);
         }
+    }
+
+    @GetMapping(value = "/promocije/{smestajId}")
+    public Page<PromocijaDTO> getAllPromocije(@PathVariable String smestajId, @PageableDefault Pageable pageable) {
+        logger.info("Incoming GET request at {} for request /smestaj/promocije/ID", applicationName);
+        List<Smestaj> smestaji = this.smestajService.getAll();
+        Page<Promocija> promocije = this.smestajService.findPromotionsBySmestajId(smestajId, pageable);
+        return this.smestajService
+                .findPromotionsBySmestajId(smestajId, pageable)
+                .map(promocijaConverter::toDTO);
     }
 
     /**
