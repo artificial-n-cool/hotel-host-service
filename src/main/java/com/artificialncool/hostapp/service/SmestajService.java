@@ -9,6 +9,13 @@ import com.artificialncool.hostapp.repository.SmestajRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +25,7 @@ import java.util.List;
 public class SmestajService {
     private final SmestajRepository smestajRepository;
     private final SmestajConverter smestajConverter;
+    private final MongoOperations mongoConnector;
 
     public Smestaj fromDTO(SmestajDTO dto) {
         return smestajConverter.fromDTO(dto);
@@ -111,6 +119,24 @@ public class SmestajService {
 
     public void deleteById(String id) {
         smestajRepository.deleteById(id);
+    }
+
+    public Page<Promocija> findPromotionsBySmestajId(String id, Pageable pageable) {
+        int pageNo = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortCriteria = pageable.getSort().toString().split(":")[0];
+        Smestaj targetSmestaj = smestajRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Nema smestaj"));
+        List<Promocija> promocije = targetSmestaj.getPromocije()
+                .stream().sorted((Promocija p1, Promocija p2) -> {
+                    if (sortCriteria.equals("datumOd")) {
+                        return p1.getDatumOd().compareTo(p2.getDatumOd());
+                    }
+                    else
+                        return p1.getDatumDo().compareTo(p2.getDatumDo());
+                })
+                .toList();
+        Page<Promocija> page = PaginationUtils.getPage(promocije, pageNo, pageSize);
+        return page;
     }
 
 }

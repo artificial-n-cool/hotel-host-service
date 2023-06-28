@@ -13,18 +13,26 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 
 
+import java.net.URI;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -188,5 +196,79 @@ public class TestSmestajIntegration {
         assertNotNull(p.getId());
     }
 
+    @Test
+    public void shouldReturnTwoPromotions() throws Exception {
+        String id = "1";
+        Smestaj smestaj = Smestaj.builder()
+                .id(id)
+                .naziv("Apartmani Brdo")
+                .lokacija("Banovo Brdo")
+                .pogodnosti("Wifi, Klima, Internet, Kablovska")
+                .opis("Halo najace")
+                .baseCena(
+                        Cena.builder()
+                                .cena(15.)
+                                .tipCene(TipCene.PO_SMESTAJU)
+                                .build()
+                )
+                .vlasnikID("4025ti4j042tu")
+                .minGostiju(1)
+                .maxGostiju(3)
+                .build();
 
+        smestaj.setPromocije(List.of(
+            Promocija.builder()
+                    .id("1")
+                    .datumOd(LocalDate.now())
+                    .datumDo(LocalDate.now())
+                    .procenat(0.5)
+                    .dani(List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+                    .build(),
+            Promocija.builder()
+                    .id("2")
+                    .datumOd(LocalDate.now())
+                    .datumDo(LocalDate.now())
+                    .procenat(0.5)
+                    .dani(List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+                    .build(),
+            Promocija.builder()
+                    .id("3")
+                    .datumOd(LocalDate.now())
+                    .datumDo(LocalDate.now())
+                    .procenat(0.5)
+                    .dani(List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+                    .build(),
+            Promocija.builder()
+                    .id("4")
+                    .datumOd(LocalDate.now())
+                    .datumDo(LocalDate.now())
+                    .procenat(0.5)
+                    .dani(List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY))
+                    .build()
+        ));
+
+        smestajRepository.save(smestaj);
+
+        RequestBuilder request1 = MockMvcRequestBuilders.get("/api/host/smestaj/promocije/" + id)
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "datumOd,asc"); // column, ASC|DESC
+
+        ResultActions actions1 = mockMvc.perform(request1);
+
+        actions1.andDo(print())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2));
+
+        RequestBuilder request2 = MockMvcRequestBuilders.get("/api/host/smestaj/promocije/" + id)
+                .param("page", "2")
+                .param("size", "2")
+                .param("sort", "datumOd,asc"); // column, ASC|DESC
+
+        ResultActions actions2 = mockMvc.perform(request2);
+
+        actions2.andDo(print())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2));
+    }
 }
