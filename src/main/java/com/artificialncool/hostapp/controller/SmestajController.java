@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
@@ -18,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(value="/api/host/smestaj")
@@ -122,6 +126,28 @@ public class SmestajController {
         }
     }
 
+    @GetMapping(value = "/promocija/{id}/for/{smestajId}")
+    public ResponseEntity<PromocijaDTO> getOneFromSmestaj(@PathVariable String id, @PathVariable String smestajId) {
+        logger.info("Incoming GET request at {} for request /smestaj/promocija/ID/for/ID", applicationName);
+        try {
+            Promocija target = smestajService.findBySmestajAndId(id, smestajId);
+            return new ResponseEntity<>(promocijaConverter.toDTO(target), HttpStatus.OK);
+        }
+        catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema smestaj/promocija sa tim ID", e);
+        }
+    }
+
+    @GetMapping(value = "/promocije/{smestajId}")
+    public Page<PromocijaDTO> getAllPromocije(@PathVariable String smestajId, @PageableDefault Pageable pageable) {
+        logger.info("Incoming GET request at {} for request /smestaj/promocije/ID", applicationName);
+        List<Smestaj> smestaji = this.smestajService.getAll();
+        Page<Promocija> promocije = this.smestajService.findPromotionsBySmestajId(smestajId, pageable);
+        return this.smestajService
+                .findPromotionsBySmestajId(smestajId, pageable)
+                .map(promocijaConverter::toDTO);
+    }
+
     /**
      * Adds a promotion to the specified residence. Note that the ID of the
      * specified residence should be stored within the DTO object.
@@ -141,6 +167,17 @@ public class SmestajController {
         // TODO: Send update to Guest app
         return new ResponseEntity<>(
             smestajService.toDTO(updated), HttpStatus.OK
+        );
+    }
+
+    @PutMapping(value = "/update-promocija")
+    public ResponseEntity<SmestajDTO> updatePromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        logger.info("Incoming PUT request at {} for request /smestaj/update-promocija", applicationName);
+        Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
+        Smestaj updated = smestajService.updatePromotion(promocijaDTO.getSmestajId(), promocija);
+        // TODO: Send update to Guest app
+        return new ResponseEntity<>(
+                smestajService.toDTO(updated), HttpStatus.OK
         );
     }
 

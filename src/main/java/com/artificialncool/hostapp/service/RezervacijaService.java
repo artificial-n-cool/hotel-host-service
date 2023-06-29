@@ -1,20 +1,29 @@
 package com.artificialncool.hostapp.service;
 
+import com.artificialncool.hostapp.dto.converter.RezervacijaConverter;
+import com.artificialncool.hostapp.dto.model.RezervacijaExtendedDTO;
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Rezervacija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
 public class RezervacijaService {
 
     final SmestajService smestajService;
+    final RezervacijaConverter rezervacijaConverter;
 
     public List<Rezervacija> findAll() {
         return smestajService.getAll()
@@ -25,6 +34,33 @@ public class RezervacijaService {
 
     public List<Rezervacija> findAllBySmestaj(String smestajId) throws EntityNotFoundException {
         return smestajService.getById(smestajId).getRezervacije();
+    }
+
+    public List<RezervacijaExtendedDTO> findAllByGuest(String korisnikId) throws EntityNotFoundException {
+        return smestajService.getAll()
+                .stream()
+                .flatMap(smestaj
+                        -> smestaj.getRezervacije()
+                            .stream()
+                            .map(r -> new RezervacijaExtendedDTO(
+                                    rezervacijaConverter.toDTO(r), smestaj.getNaziv()
+                            )))
+                .filter(r -> r.getKorisnikID().equals(korisnikId))
+                .toList();
+    }
+
+    public Page<RezervacijaExtendedDTO> findAllByGuest(String korisnikId, Pageable pageable) throws EntityNotFoundException {
+        List<RezervacijaExtendedDTO> targetReservations = new ArrayList<>(findAllByGuest(korisnikId));
+        String sortCriterium = pageable.getSort().toString().split(":")[0];
+        if (sortCriterium.equals("datumOd"))
+            targetReservations.sort(Comparator.comparing(RezervacijaExtendedDTO::getDatumOd));
+        else if (sortCriterium.equals("datumDo"))
+            targetReservations.sort(Comparator.comparing(RezervacijaExtendedDTO::getDatumDo));
+        else
+            targetReservations.sort(Comparator.comparing(RezervacijaExtendedDTO::getSmestajNaziv));
+        int pageNumber = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        return PaginationUtils.getPage(targetReservations, pageNumber, pageSize);
     }
 
     public List<Rezervacija> findAllNewBySmestaj(String smestajId) throws EntityNotFoundException {
@@ -114,5 +150,37 @@ public class RezervacijaService {
         sve.add(rezervacija);
         smestaj.setRezervacije(sve);
         return smestajService.save(smestaj);
+    }
+
+    public Page<Rezervacija> getAllUnavailabilitiesForSmestaj(String smestajId, Pageable pageable)
+            throws NoSuchElementException {
+        int pageNumber = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortCriteria = pageable.getSort().toString().split(":")[0];
+        Smestaj targetSmestaj = smestajService.getById(smestajId);
+        List<Rezervacija> rezervacije = targetSmestaj.getRezervacije()
+                .stream()
+                .filter((rezervacija ->
+                    rezervacija.getKorisnikID().equals(targetSmestaj.getVlasnikID())
+                ))
+                .sorted((Rezervacija p1, Rezervacija p2) -> {
+                    if (sortCriteria.equals("datumOd")) {
+                        return p1.getDatumOd().compareTo(p2.getDatumOd());
+                    }
+                    else
+                        return p1.getDatumDo().compareTo(p2.getDatumDo());
+                })
+                .toList();
+        Page<Rezervacija> page = PaginationUtils.getPage(rezervacije, pageNumber, pageSize);
+        return page;
+    }
+
+    public void removeRezervacijaForSmestaj(String rezervacijaId, String smestajId) {
+        Smestaj targetSmestaj = smestajService.getById(smestajId);
+        List<Rezervacija> rezervacije = targetSmestaj.getRezervacije().stream()
+                .filter(r -> !r.getId().equals(rezervacijaId))
+                .toList();
+
+        targetSmestaj.setRezervacije(rezervacije);
     }
 }
