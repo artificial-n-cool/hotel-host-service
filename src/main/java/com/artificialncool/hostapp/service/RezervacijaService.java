@@ -1,14 +1,18 @@
 package com.artificialncool.hostapp.service;
 
+import com.artificialncool.hostapp.model.Promocija;
 import com.artificialncool.hostapp.model.Rezervacija;
 import com.artificialncool.hostapp.model.Smestaj;
 import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -114,5 +118,28 @@ public class RezervacijaService {
         sve.add(rezervacija);
         smestaj.setRezervacije(sve);
         return smestajService.save(smestaj);
+    }
+
+    public Page<Rezervacija> getAllUnavailabilitiesForSmestaj(String smestajId, Pageable pageable)
+            throws NoSuchElementException {
+        int pageNumber = pageable.getPageNumber();
+        int pageSize = pageable.getPageSize();
+        String sortCriteria = pageable.getSort().toString().split(":")[0];
+        Smestaj targetSmestaj = smestajService.getById(smestajId);
+        List<Rezervacija> rezervacije = targetSmestaj.getRezervacije()
+                .stream()
+                .filter((rezervacija ->
+                    rezervacija.getKorisnikID().equals(targetSmestaj.getVlasnikID())
+                ))
+                .sorted((Rezervacija p1, Rezervacija p2) -> {
+                    if (sortCriteria.equals("datumOd")) {
+                        return p1.getDatumOd().compareTo(p2.getDatumOd());
+                    }
+                    else
+                        return p1.getDatumDo().compareTo(p2.getDatumDo());
+                })
+                .toList();
+        Page<Rezervacija> page = PaginationUtils.getPage(rezervacije, pageNumber, pageSize);
+        return page;
     }
 }

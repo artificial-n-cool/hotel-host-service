@@ -3,7 +3,9 @@ package com.artificialncool.hostapp.service;
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
 import com.artificialncool.hostapp.model.Promocija;
+import com.artificialncool.hostapp.model.Rezervacija;
 import com.artificialncool.hostapp.model.Smestaj;
+import com.artificialncool.hostapp.model.enums.StatusRezervacije;
 import com.artificialncool.hostapp.model.helpers.Cena;
 import com.artificialncool.hostapp.repository.SmestajRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -18,6 +20,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,7 +28,6 @@ import java.util.List;
 public class SmestajService {
     private final SmestajRepository smestajRepository;
     private final SmestajConverter smestajConverter;
-    private final MongoOperations mongoConnector;
 
     public Smestaj fromDTO(SmestajDTO dto) {
         return smestajConverter.fromDTO(dto);
@@ -105,8 +107,37 @@ public class SmestajService {
         return save(toPromote);
     }
 
-    public Smestaj removePromotion(String smestajId, String promocijaId) throws EntityNotFoundException {
+    private boolean canEditPromotion(String smestajId, String promocijaId) {
+        try {
+            Promocija p = getById(smestajId).getPromocije()
+                    .stream()
+                    .filter((promocija) -> promocija.getId().equals(promocijaId))
+                    .findFirst()
+                    .orElseThrow(() -> new EntityNotFoundException("Nema ta promocija"));
+
+            List<Rezervacija> rezervacije = getById(smestajId).getRezervacije();
+
+
+            rezervacije.forEach((rezervacija -> {
+                if (rezervacija.getStatusRezervacije().equals(StatusRezervacije.PRIHVACENO)) {
+                    if (rezervacija.getDatumOd().isBefore(p.getDatumDo())
+                            && rezervacija.getDatumDo().isAfter(p.getDatumOd()))
+                        throw new IllegalArgumentException("Postoje aktivne rezervacije u tom periodu");
+                }
+            }));
+        }
+        catch (IllegalArgumentException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public Smestaj removePromotion(String smestajId, String promocijaId)
+            throws EntityNotFoundException, IllegalArgumentException {
         Smestaj toCleanup = getById(smestajId);
+
+        if (!canEditPromotion(smestajId, promocijaId))
+            throw new IllegalArgumentException("Postoje aktivne rezervacije u tom periodu");
 
         List<Promocija> filteredPromotions
                 = toCleanup.getPromocije().stream()
@@ -115,6 +146,29 @@ public class SmestajService {
 
         toCleanup.setPromocije(filteredPromotions);
         return save(toCleanup);
+    }
+
+    public Smestaj updatePromotion(String smestajId, Promocija updated) {
+        String promocijaId = updated.getId();
+        Smestaj toUpdate = getById(smestajId);
+
+        if (!canEditPromotion(smestajId, promocijaId))
+            throw new IllegalArgumentException("Postoje aktivne rezervacije u tom periodu");
+
+        ArrayList<Promocija> filteredPromotions
+                = (ArrayList<Promocija>) toUpdate.getPromocije().stream()
+                .peek((promocija) -> {
+                    if (promocija.getId().equals(promocijaId)) {
+                        promocija.setDatumOd(updated.getDatumOd());
+                        promocija.setDatumDo(updated.getDatumDo());
+                        promocija.setProcenat(updated.getProcenat());
+                        promocija.setDani(updated.getDani());
+                    }
+                })
+                .toList();
+
+        toUpdate.setPromocije(filteredPromotions);
+        return save(toUpdate);
     }
 
     public void deleteById(String id) {
@@ -137,6 +191,16 @@ public class SmestajService {
                 .toList();
         Page<Promocija> page = PaginationUtils.getPage(promocije, pageNo, pageSize);
         return page;
+    }
+
+    public Promocija findBySmestajAndId(String id, String smestajId) {
+        return smestajRepository
+                .findById(smestajId)
+                .orElseThrow()
+                .getPromocije().stream()
+                .filter(p -> p.getId().equals(id))
+                .findFirst()
+                .orElseThrow();
     }
 
 }
