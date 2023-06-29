@@ -18,12 +18,15 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.testcontainers.utility.DockerImageName;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -224,5 +227,116 @@ public class TestRezervacijeIntegration {
                 .accept(MediaType.APPLICATION_JSON))
             .andDo(print())
             .andExpect(status().isConflict());
+    }
+
+
+    @Test
+    public void shouldReturnMultipleUserReservations() throws Exception {
+        String id_1 = "1";
+        Smestaj smestaj1 = Smestaj.builder()
+                .id(id_1)
+                .naziv("Apartmani Brdo")
+                .lokacija("Banovo Brdo")
+                .pogodnosti("Wifi, Klima, Internet, Kablovska")
+                .opis("Halo najace")
+                .baseCena(
+                        Cena.builder()
+                                .cena(15.)
+                                .tipCene(TipCene.PO_SMESTAJU)
+                                .build()
+                )
+                .vlasnikID("4025ti4j042tu")
+                .minGostiju(1)
+                .maxGostiju(3)
+                .build();
+
+        String id_2 = "2";
+        Smestaj smestaj2 = Smestaj.builder()
+                .id(id_2)
+                .naziv("Apartmani Brdo")
+                .lokacija("Banovo Brdo")
+                .pogodnosti("Wifi, Klima, Internet, Kablovska")
+                .opis("Halo najace")
+                .baseCena(
+                        Cena.builder()
+                                .cena(15.)
+                                .tipCene(TipCene.PO_SMESTAJU)
+                                .build()
+                )
+                .vlasnikID("4025ti4j042tu")
+                .minGostiju(1)
+                .maxGostiju(3)
+                .build();
+
+        smestajRepository.save(smestaj1);
+        smestajRepository.save(smestaj2);
+
+
+        RezervacijaDTO rezervacijaDTO_1 = RezervacijaDTO.builder()
+                .datumOd("2023-01-07")
+                .datumDo("2023-08-07")
+                .smestajID(id_1)
+                .statusRezervacije("U_OBRADI")
+                .korisnikID("4025ti4j042tu")
+                .brojOsoba(3)
+                .build();
+
+        RezervacijaDTO rezervacijaDTO_2 = RezervacijaDTO.builder()
+                .datumOd("2023-01-07")
+                .datumDo("2023-08-07")
+                .smestajID(id_2)
+                .statusRezervacije("U_OBRADI")
+                .korisnikID("4025ti4j042tu")
+                .brojOsoba(3)
+                .build();
+
+        RezervacijaDTO rezervacijaDTO_3 = RezervacijaDTO.builder()
+                .datumOd("2023-01-07")
+                .datumDo("2023-08-07")
+                .smestajID(id_2)
+                .statusRezervacije("U_OBRADI")
+                .korisnikID("4025ti4j042tu")
+                .brojOsoba(3)
+                .build();
+
+        RezervacijaDTO rezervacijaDTO_4 = RezervacijaDTO.builder()
+                .datumOd("2023-01-07")
+                .datumDo("2023-08-07")
+                .smestajID(id_2)
+                .statusRezervacije("U_OBRADI")
+                .korisnikID("4025ti4j042tu")
+                .brojOsoba(3)
+                .build();
+
+        mockMvc.perform(post("/api/host/rezervacije")
+                .content(new ObjectMapper().writeValueAsString(rezervacijaDTO_1))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/host/rezervacije")
+                .content(new ObjectMapper().writeValueAsString(rezervacijaDTO_2))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/host/rezervacije")
+                .content(new ObjectMapper().writeValueAsString(rezervacijaDTO_3))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/host/rezervacije")
+                .content(new ObjectMapper().writeValueAsString(rezervacijaDTO_4))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
+
+
+        mockMvc.perform(get("/api/host/rezervacije/by-guest/4025ti4j042tu")
+                        .param("page", "1")
+                        .param("size", "10")
+                        .param("sort", "datumOd,asc")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(4));
     }
 }
