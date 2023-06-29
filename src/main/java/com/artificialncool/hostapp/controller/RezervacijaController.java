@@ -3,6 +3,7 @@ package com.artificialncool.hostapp.controller;
 import com.artificialncool.hostapp.dto.converter.RezervacijaConverter;
 import com.artificialncool.hostapp.dto.converter.SmestajConverter;
 import com.artificialncool.hostapp.dto.model.RezervacijaDTO;
+import com.artificialncool.hostapp.dto.model.RezervacijaExtendedDTO;
 import com.artificialncool.hostapp.dto.model.SmestajDTO;
 import com.artificialncool.hostapp.model.Rezervacija;
 import com.artificialncool.hostapp.model.Smestaj;
@@ -62,6 +63,12 @@ public class RezervacijaController {
         return new ResponseEntity<>(rezervacije, HttpStatus.OK);
     }
 
+    @GetMapping(value = "/by-guest/{korisnikId}")
+    public Page<RezervacijaExtendedDTO> getAllForGuest(@PathVariable String korisnikId, @PageableDefault Pageable pageable) {
+        logger.info("Incoming GET request at {} for request /rezervacije/by-guest", applicationName);
+        return rezervacijaService.findAllByGuest(korisnikId, pageable);
+    }
+
     @GetMapping(value = "/nove/{smestajId}")
     public ResponseEntity<List<RezervacijaDTO>>
     getNewForSmestaj(@PathVariable String smestajId) {
@@ -71,7 +78,6 @@ public class RezervacijaController {
                 .stream()
                 .map(rez -> rezervacijaConverter.toDTOForSmestaj(rez, smestajId))
                 .toList();
-
         return new ResponseEntity<>(rezervacije, HttpStatus.OK);
     }
 
@@ -150,6 +156,22 @@ public class RezervacijaController {
         catch (EntityNotFoundException e2) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj", e2);
         }
+    }
+
+    @DeleteMapping(value = "/delete-unavailability/{unavailabilityId}/{smestajId}")
+    public ResponseEntity<Void> removeUnavailability(@PathVariable String unavailabilityId, @PathVariable String smestajId) {
+        try {
+            this.rezervacijaService.removeRezervacijaForSmestaj(unavailabilityId, smestajId);
+            restTemplate.delete("http://localhost:8081/api/smestaj/obrisiRezervaciju");
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj/nedostupnost");
+        }
+        catch (RestClientException e2) {
+            e2.printStackTrace();
+            logger.warn("Sync FAIL at /api/host/rezervacija/delete-unavailability at {}", applicationName);
+        }
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "get-unavailable/{smestajId}")
