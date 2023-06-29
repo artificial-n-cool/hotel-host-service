@@ -21,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping(value="/api/host/smestaj")
@@ -117,6 +118,18 @@ public class SmestajController {
         }
     }
 
+    @GetMapping(value = "/promocija/{id}/for/{smestajId}")
+    public ResponseEntity<PromocijaDTO> getOneFromSmestaj(@PathVariable String id, @PathVariable String smestajId) {
+        logger.info("Incoming GET request at {} for request /smestaj/promocija/ID/for/ID", applicationName);
+        try {
+            Promocija target = smestajService.findBySmestajAndId(id, smestajId);
+            return new ResponseEntity<>(promocijaConverter.toDTO(target), HttpStatus.OK);
+        }
+        catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema smestaj/promocija sa tim ID", e);
+        }
+    }
+
     @GetMapping(value = "/promocije/{smestajId}")
     public Page<PromocijaDTO> getAllPromocije(@PathVariable String smestajId, @PageableDefault Pageable pageable) {
         logger.info("Incoming GET request at {} for request /smestaj/promocije/ID", applicationName);
@@ -146,6 +159,17 @@ public class SmestajController {
         // TODO: Send update to Guest app
         return new ResponseEntity<>(
             smestajService.toDTO(updated), HttpStatus.OK
+        );
+    }
+
+    @PutMapping(value = "/update-promocija")
+    public ResponseEntity<SmestajDTO> updatePromocija(@RequestBody PromocijaDTO promocijaDTO) {
+        logger.info("Incoming PUT request at {} for request /smestaj/update-promocija", applicationName);
+        Promocija promocija = promocijaConverter.fromDTO(promocijaDTO);
+        Smestaj updated = smestajService.updatePromotion(promocijaDTO.getSmestajId(), promocija);
+        // TODO: Send update to Guest app
+        return new ResponseEntity<>(
+                smestajService.toDTO(updated), HttpStatus.OK
         );
     }
 

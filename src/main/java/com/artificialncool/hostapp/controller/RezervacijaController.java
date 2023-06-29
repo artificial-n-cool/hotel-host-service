@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -148,6 +151,18 @@ public class RezervacijaController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj", e2);
         }
     }
+
+    @GetMapping(value = "get-unavailable/{smestajId}")
+    public Page<RezervacijaDTO> getAllUnavailabilitiesForSmestaj(@PathVariable String smestajId, @PageableDefault Pageable pageable) {
+        try {
+            Page<Rezervacija> rezervacije = rezervacijaService.getAllUnavailabilitiesForSmestaj(smestajId, pageable);
+            return rezervacije.map(rezervacijaConverter::toDTO);
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Nema takav smestaj", e);
+        }
+    }
+
 
 
     @PutMapping(value = "/accept/{rezId}/{smestajId}")
