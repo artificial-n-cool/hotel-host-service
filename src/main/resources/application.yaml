@@ -3,6 +3,8 @@ spring:
     active: dev
   application:
     name: host-app
+#server:
+#  port: 8085
 
 frontend:
   name: http://localhost:4200

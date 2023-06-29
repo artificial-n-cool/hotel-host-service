@@ -42,12 +42,12 @@ public class SmestajController {
         Thread syncThread = new Thread(() -> {
             try {
                 restTemplate.postForEntity(
-                        "http://guest-app-service:8080/api/guest/smestaj/addSmestaj",
+                        "http://localhost:8085/api/guest/smestaj/addSmestaj",
                         newSmestajDTO,
                         Void.class
                 );
                 restTemplate.postForEntity(
-                        "http://auth-app-service:8080/api/auth/smestaj/addSmestaj",
+                        "http://localhost:9091/api/auth/smestaj/addSmestaj",
                         newSmestajDTO,
                         Void.class
                 );
@@ -84,6 +84,14 @@ public class SmestajController {
         return new ResponseEntity<>(
                 smestajService.getAll()
                         .stream().map(smestajService::toDTO).toList(),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping(value = "/all")
+    public ResponseEntity<List<Smestaj>> readAllSmestaji() {
+        logger.info("Incoming GET request at {} for request /smestaj", applicationName);
+        return new ResponseEntity<>(
+                smestajService.getAll(),
                 HttpStatus.OK
         );
     }

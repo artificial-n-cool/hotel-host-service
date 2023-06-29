@@ -7,7 +7,7 @@ services:
         dockerfile: Dockerfile-dev
       restart: always
       ports:
-        - "8080:8080"
+        - "8085:8080"
       depends_on:
         - mongo-db-host
       environment:
