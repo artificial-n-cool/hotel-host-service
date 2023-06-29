@@ -34,9 +34,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest(properties = "spring.config.name=test")
+@SpringBootTest
 @AutoConfigureMockMvc
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestPropertySource("classpath:test.properties")
 public class TestSmestajIntegration {
     @Autowired
     MockMvc mockMvc;

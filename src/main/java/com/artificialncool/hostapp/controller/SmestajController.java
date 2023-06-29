@@ -39,17 +39,26 @@ public class SmestajController {
     public ResponseEntity<SmestajDTO> create(@RequestBody SmestajDTO newSmestajDTO) {
         logger.info("Incoming POST request at {} for request /smestaj", applicationName);
         SmestajDTO saved = smestajService.save(newSmestajDTO);
-        try {
-            restTemplate.postForEntity(
-                    "http://guest-app-service:8080/api/guest/smestaj/addSmestaj",
-                    newSmestajDTO,
-                    Void.class
-            );
-        }
-        catch (RestClientException ex) {
-            ex.printStackTrace();
-            System.out.println("Nebitno");
-        }
+        Thread syncThread = new Thread(() -> {
+            try {
+                restTemplate.postForEntity(
+                        "http://localhost:8085/api/guest/smestaj/addSmestaj",
+                        newSmestajDTO,
+                        Void.class
+                );
+                restTemplate.postForEntity(
+                        "http://localhost:9091/api/auth/smestaj/addSmestaj",
+                        newSmestajDTO,
+                        Void.class
+                );
+            }
+            catch (RestClientException ex) {
+                ex.printStackTrace();
+                System.out.println("Nebitno");
+            }
+        });
+        syncThread.start();
+
 
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
@@ -75,6 +84,14 @@ public class SmestajController {
         return new ResponseEntity<>(
                 smestajService.getAll()
                         .stream().map(smestajService::toDTO).toList(),
+                HttpStatus.OK
+        );
+    }
+    @GetMapping(value = "/all")
+    public ResponseEntity<List<Smestaj>> readAllSmestaji() {
+        logger.info("Incoming GET request at {} for request /smestaj", applicationName);
+        return new ResponseEntity<>(
+                smestajService.getAll(),
                 HttpStatus.OK
         );
     }

@@ -2,16 +2,21 @@ version: "3.8"
 services:
     host-app:
       container_name: host-app
-      build: .
+      build:
+        context: .
+        dockerfile: Dockerfile-dev
       restart: always
       ports:
-        - "8080:8080"
+        - "8085:8080"
       depends_on:
         - mongo-db-host
       environment:
         - SPRING_DATA_MONGODB_HOST=mongo-db-host
         - SPRING_DATA_MONGODB_PORT=27017
         - SPRING_DATA_MONGODB_DATABASE=test-db
+#        - MONGO_HOST=mongo-db-host
+#        - MONGO_PORT=27017
+#        - MONGO_DB=test-db
       networks:
         - database-net
 

@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(properties = "spring.config.name=test")
 @AutoConfigureMockMvc
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@TestPropertySource("classpath:test.properties")
 public class TestDatabaseCon {
     @Autowired
     MockMvc mockMvc;

@@ -30,6 +30,7 @@ public class Smestaj {
     private Double prosecnaOcena;
     private Cena baseCena;
 
+    private List<String> slike = new ArrayList<>();
     private List<OcenaSmestaja> ocene = new ArrayList<>();
     private List<Promocija> promocije = new ArrayList<>();
     private List<Rezervacija> rezervacije = new ArrayList<>();
